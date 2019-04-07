@@ -16,6 +16,15 @@ Goals:
   ModSaber, EditSaber)
 * as much modularity, flexibility, and moddability as possible
 
+Dependencies:
+-------------
+
+* OpenHMD
+* json-c
+* SDL2
+* SDL2_mixer
+* GLEW
+
 License:
 --------
 
@@ -24,5 +33,5 @@ ISC (see LICENSE)
 Repositories:
 -------------
 
-CVS (main repository): https://thfr.info/cgi-bin/cvsweb/projects/OpenslasHMD
-GitHub (mirror): https://github.com/rfht/OpenslasHMD
+GitHub: https://github.com/rfht/OpenslasHMD
+CVS: https://thfr.info/cgi-bin/cvsweb/projects/OpenslasHMD
