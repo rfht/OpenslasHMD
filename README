@@ -1,0 +1,28 @@
+OpenslasHMD
+===========
+
+Experimental open-source VR rhythm game.
+
+The code is partially derived from the Boost licensed opengl-example from the
+OpenHMD project (http://www.openhmd.net) and the modified opengl3-example from
+ChristophHaag (https://github.com/ChristophHaag; also Boost license 1.0).
+
+Goals:
+------
+
+* Unix-portability, using SDL2, OpenHMD, etc.
+* ability to play back songs of a variety of sources (file formats, streaming sources)
+* ability to play back maps created by Beat Saber community tools (bsaber.com,
+  ModSaber, EditSaber)
+* as much modularity, flexibility, and moddability as possible
+
+License:
+--------
+
+ISC (see LICENSE)
+
+Repositories:
+-------------
+
+CVS (main repository): https://thfr.info/cgi-bin/cvsweb/projects/OpenslasHMD
+GitHub (mirror): https://github.com/rfht/OpenslasHMD

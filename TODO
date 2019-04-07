@@ -1,0 +1,4 @@
+maploader.c:62:11: warning: assignment discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  _version = json_object_get_string(jversion);
+
+remove/destroy objects that have passed the player
