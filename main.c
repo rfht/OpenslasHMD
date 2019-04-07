@@ -178,6 +178,21 @@ void spawn_note(struct note snote, float distance)
 			distance);
 }
 
+void print_help()
+{
+	printf("|=========================================================|\n");
+	printf("| OpenslasHMD Help                                        |\n");
+	printf("|=========================================================|\n");
+	printf("| -chart mysong/mysong.json  - json chart of the song     |\n");
+	printf("| -song mysong/mysong.ogg    - audio file of the song     |\n");
+	printf("|                                                         |\n");
+	printf("| - Example -                                             |\n"); 
+	printf("| ./OpenslasHMD -chart test/easy.json -song test/song.ogg |\n");
+	printf("|=========================================================|\n");
+	printf("| Github: https://github.com/rfht/OpenslasHMD             |\n");
+	printf("|---------------------------------------------------------|\n");
+}
+
 int main(int argc, char** argv)
 {
 	/* intialize SDL_mixer */
@@ -192,6 +207,11 @@ int main(int argc, char** argv)
 	char* song;
 	char* chart;
 
+	if (argc <= 1)
+	{
+		print_help();
+		exit(0);
+	}
 	/* User can set devices to use with flags. There is no validation that -lc is actually a left controller*/
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-hmd") == 0 && i < argc - 1) {
@@ -213,6 +233,11 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-chart") == 0 && i < argc - 1) {
 			chart = argv[i+1];
 			printf("Chart %s\n", chart);
+		}
+		if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--?") == 0)
+		{
+			print_help();
+			exit(0);
 		}
 	}
 
