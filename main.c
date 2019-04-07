@@ -143,7 +143,7 @@ void draw_cubes(GLuint shader)
 	glUniform4f(colorLoc, 0, .4f, .25f, .9f);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
-
+/*
 void draw_controllers(GLuint shader, ohmd_device *lc, ohmd_device *rc)
 {
 	int modelLoc = glGetUniformLocation(shader, "model");
@@ -162,7 +162,7 @@ void draw_controllers(GLuint shader, ohmd_device *lc, ohmd_device *rc)
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*) rcmodel.m);
 	glUniform4f(colorLoc, 0.0, 1.0, 0.0, 1.0);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-}
+}*/
 
 long clock_to_msec(clock_t duration)
 {
@@ -189,6 +189,8 @@ int main(int argc, char** argv)
 	int hmddev = -1;
 	int lcontrollerdev = -1;
 	int rcontrollerdev = -1;
+	char* song;
+	char* chart;
 
 	/* User can set devices to use with flags. There is no validation that -lc is actually a left controller*/
 	for (int i = 0; i < argc; i++) {
@@ -203,6 +205,14 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-rc") == 0 && i < argc - 1) {
 			rcontrollerdev = strtol(argv[i+1], NULL, 10);
 			printf("Using right controller device %d\n", rcontrollerdev);
+		}
+		if (strcmp(argv[i], "-song") == 0 && i < argc - 1) {
+			song = argv[i+1];
+			printf("Song: %s\n", song);
+		}
+		if (strcmp(argv[i], "-chart") == 0 && i < argc - 1) {
+			chart = argv[i+1];
+			printf("Chart %s\n", chart);
 		}
 	}
 
@@ -325,10 +335,10 @@ int main(int argc, char** argv)
 	/* load map and music */
 	struct note *_notes = malloc(sizeof(struct note) * MAX_SONG_NOTES);
 	struct obstacle *_obstacles = malloc(sizeof(struct obstacle) * MAX_SONG_OBSTACLES);
-	init_map("../testdata/nggyu.json", _notes, _obstacles);
+	init_map(chart, _notes, _obstacles);
 	printf("_version: %s\n", _version);
 
-	gMusic = Mix_LoadMUS("../testdata/nggyu.wav");
+	gMusic = Mix_LoadMUS(song);
 	if (gMusic == NULL)
 	{
 		printf("Failed to load music. Error: %s\n", Mix_GetError());
