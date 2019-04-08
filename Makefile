@@ -1,7 +1,7 @@
-CFLAGS +=	-I/usr/include/SDL2
+CFLAGS +=	-I/usr/include/SDL2 -g
 #LDFLAGS +=	-L/usr/lib/x86_64-linux-gnu \
 #		-L/usr/local/lib \
-LDFLAGS +=	-lGLEW -lGL -lopenhmd -lSDL2 -lm -ljson-c
+LDFLAGS +=	-lGLEW -lGL -lopenhmd -lSDL2 -lm -ljson-c -g
 
 all: OpenslasHMD
 

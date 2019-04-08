@@ -16,6 +16,7 @@
 #include "gl.h"
 #define MATH_3D_IMPLEMENTATION
 #include "math_3d.h"
+#include "resourceloader.h"
 #include "maploader.h"
 
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
@@ -428,6 +429,8 @@ int main(int argc, char** argv)
 	Mix_PlayMusic(gMusic, -1);
 	// DEBUG
 	int iter = 0;
+
+	load_gltf("resources/ArrowCube.gltf");
 
 	while(!done){
 		/* update current time */
