@@ -19,7 +19,8 @@
  * Each cube has a uniform for Color and Modelmatrix.
  * Viewmatrix and Projectionmatrix should be used from OpenHMD. */
 static char* vertexshader =
-"#version 450 core\n"
+"#version 330 core\n"
+"#extension GL_ARB_explicit_uniform_location: enable\n"
 "layout(location = 0) in vec3 aPos;\n"
 "layout(location = 2) uniform mat4 model;\n"
 "layout(location = 3) uniform mat4 view;\n"
@@ -29,7 +30,8 @@ static char* vertexshader =
 "}\n";
 
 static char* fragmentshader =
-"#version 450 core\n"
+"#version 330 core\n"
+"#extension GL_ARB_explicit_uniform_location: enable\n"
 "layout(location = 0) out vec4 FragColor;\n"
 "layout(location = 1) uniform vec4 uniformColor;\n"
 "void main() {\n"
