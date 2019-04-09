@@ -11,10 +11,13 @@ Goals:
 ------
 
 * Unix-portability, using SDL2, OpenHMD, etc.
-* ability to play back songs of a variety of sources (file formats, streaming sources)
+* ability to play back songs of a variety of sources (file formats, streaming
+  sources)
 * ability to play back maps created by Beat Saber community tools (bsaber.com,
   ModSaber, EditSaber)
 * as much modularity, flexibility, and moddability as possible
+* Avoid bloat in core engine, that is minimum build and runtime dependencies.
+  Any future plugins etc can be as bloated as they want.
 
 Dependencies:
 -------------
