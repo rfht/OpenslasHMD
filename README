@@ -28,6 +28,14 @@ Dependencies:
 * SDL2_mixer
 * GLEW
 
+Building:
+---------
+
+OpenBSD:
+
+    $ CFLAGS="-I/usr/local/include -I/usr/X11R6/include" \
+	LDFLAGS="-L/usr/local/lib -L/usr/X11R6/lib" make
+
 License:
 --------
 
