@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 #include <time.h>
-#include <SDL.h>
-#include <SDL_mixer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "gl.h"
 #define MATH_3D_IMPLEMENTATION

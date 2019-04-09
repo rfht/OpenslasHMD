@@ -10,7 +10,7 @@
 #ifndef GL_H
 #define GL_H
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
