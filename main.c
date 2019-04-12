@@ -14,19 +14,19 @@
 #include <SDL_mixer.h>
 
 #include "gl.h"
-#define MATH_3D_IMPLEMENTATION
-#include "math_3d.h"
 #include "resourceloader.h"
+#include "gameobjects.h"
 #include "maploader.h"
 
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) ((angleRadians) * 180.0 / M_PI)
 
 #define OVERSAMPLE_SCALE 2.0
-#define MAX_OBJ_NUM	1024
 #define MAX_SONG_NOTES		32000		// Shrek entire movie: 11,765 notes
 #define MAX_SONG_OBSTACLES	32000
 
+Scene* scene = NULL;
+	
 void GLAPIENTRY
 gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
                   GLsizei length, const GLchar* message, const void* userParam)
@@ -35,16 +35,6 @@ gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
 	        (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 	        type, severity, message);
 }
-
-float randf()
-{
-	return (float)rand() / (float)RAND_MAX;
-}
-
-mat4_t obj_modelmatrix[MAX_OBJ_NUM];
-vec3_t obj_colors[MAX_OBJ_NUM];
-float obj_alpha[MAX_OBJ_NUM];
-bool obj_active[MAX_OBJ_NUM];
 
 /* 4x3 grid as in beat saber */
 #define grid_x			4
@@ -66,54 +56,19 @@ bool obj_active[MAX_OBJ_NUM];
 /* http://lazyfoo.net/tutorials/SDL/21_sound_effects_and_music/index.php */
 Mix_Music *gMusic = NULL;
 
-/* generate new cube at distance distance, with grid position x, y (from bottom left) */
-void gen_object(float distance, float x, float y, int type)
-{
-	for (int i = 0; i < MAX_OBJ_NUM; i++) {
-		if (!obj_active[i]) {
-			obj_modelmatrix[i] = m4_identity();
-			//obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_rotation(degreesToRadians(i * 20), vec3(0, 1, 0)));
-			// transpose from starting point
-			obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_translation(vec3(x, y, 0)));
-			obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_translation(vec3(-(spawn_grid_width / 2), floor_level, -distance)));
-			//obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_rotation(degreesToRadians(randf() * 360), vec3(randf(), randf(), randf())));
-			switch (type) {
-				case 0:
-					obj_colors[i] = vec3(1.0, 0.0, 0.0);
-					break;
-				case 1:
-					obj_colors[i] = vec3(0.0, 0.0, 1.0);
-					break;
-				case 2:
-					obj_colors[i] = vec3(randf(), randf(), randf());
-					break;
-				//default:
-					/* ? need to error in this case? */
-			}
-			//obj_colors[i] = vec3(randf(), randf(), randf());
-			
-			/* change to proper size */
-			obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_scaling(vec3(0.5, 0.5, 0.5)));
-			obj_alpha[i] = 1.0; //randf();
-			obj_active[i] = 1;
-			return;
-		}
-	}
-}
-
 void grid_spawn(float lineIndex, float lineLayer, int type, float distance)
 {
 	float x = lineIndex * spawn_grid_cell_width;
 	float y = -floor_level + (lineLayer * spawn_grid_cell_height);
-	gen_object(distance, x, y, type);
+	gen_scene(scene, distance, x, y, type);
 }
 
 // TODO: Is this framerate-dependent??
 void move_all_objects(float speed)
 {
 	for (int i = 0; i < MAX_OBJ_NUM; i++) {
-		if (obj_active[i]) {
-			obj_modelmatrix[i] = m4_mul(obj_modelmatrix[i], m4_translation(vec3(0, 0, speed)));
+		if (scene->obj_active[i]) {
+			scene->obj_modelmatrix[i] = m4_mul(scene->obj_modelmatrix[i], m4_translation(vec3(0, 0, speed)));
 		}
 	}
 }
@@ -129,8 +84,8 @@ void draw_cubes(GLuint shader)
 	int modelLoc = glGetUniformLocation(shader, "model");
 	int colorLoc = glGetUniformLocation(shader, "uniformColor");
 	for(int i = 0; i < MAX_OBJ_NUM; i ++) {
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*) obj_modelmatrix[i].m);
-		glUniform4f(colorLoc, obj_colors[i].x, obj_colors[i].y, obj_colors[i].z, obj_alpha[i]);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*) (scene->obj_modelmatrix)[i].m);
+		glUniform4f(colorLoc, scene->obj_colors[i].x, scene->obj_colors[i].y, scene->obj_colors[i].z, scene->obj_alpha[i]);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
@@ -431,6 +386,8 @@ int main(int argc, char** argv)
 	int iter = 0;
 
 	load_gltf("resources/ArrowCube.gltf");
+	//obj_modelmatrix = malloc(MAX_OBJ_NUM*sizeof(mat4_t));
+	scene = calloc(1, sizeof(Scene));
 
 	while(!done){
 		/* update current time */
@@ -566,7 +523,8 @@ int main(int argc, char** argv)
 	maploader_cleanup();
 	free(_notes);
 	free(_obstacles);
-
+	free(scene);
+	
 	/* SDL2_mixer cleanup */
 	Mix_FreeMusic(gMusic);
 	gMusic = NULL;

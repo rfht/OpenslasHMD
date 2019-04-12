@@ -1,5 +1,5 @@
 /*
- * OpenHMD - Free and Open Source API and drivers for immersive technology.
+ * OpenslasHMD
  * Copyright (C) 2019 Joey Ferwerda
  * Distributed under the Boost 1.0 licence, see LICENSE for full text.
  */

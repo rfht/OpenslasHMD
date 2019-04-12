@@ -1,3 +1,7 @@
+/* Resource Loader usng GLTF2*/
+#ifndef MAPLOADER_H
+#define MAPLOADER_H
+
 // https://pastebin.com/cTPGrxWY -> explains json layout
 #include <stdio.h>
 #include <json-c/json.h>
@@ -51,3 +55,5 @@ extern int num_events;
 void init_map(char *filename, struct note *_notes, struct obstacle *_obstacles);
 
 void maploader_cleanup();
+
+#endif
