@@ -83,8 +83,8 @@ void gen_object(float distance, float x, float y, int type)
 				case 1:
 					obj_colors[i] = vec3(0.0, 0.0, 1.0);
 					break;
-				case 2:
-					obj_colors[i] = vec3(randf(), randf(), randf());
+				case 3:
+					obj_colors[i] = vec3(0.4, 0.4, 0.4);
 					break;
 				//default:
 					/* ? need to error in this case? */
