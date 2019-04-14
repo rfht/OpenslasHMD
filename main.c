@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
-#include <time.h>
+#include <sys/time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
@@ -86,8 +86,9 @@ void gen_object(float distance, float x, float y, int type)
 				case 3:
 					obj_colors[i] = vec3(0.4, 0.4, 0.4);
 					break;
-				//default:
+				default:
 					/* ? need to error in this case? */
+					break;
 			}
 			//obj_colors[i] = vec3(randf(), randf(), randf());
 			
@@ -163,13 +164,6 @@ void draw_controllers(GLuint shader, ohmd_device *lc, ohmd_device *rc)
 	glUniform4f(colorLoc, 0.0, 1.0, 0.0, 1.0);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }*/
-
-long clock_to_msec(clock_t duration)
-{
-	/* https://stackoverflow.com/questions/17167949/how-to-use-timer-in-c */
-	/* TODO: Magic number - this should be 1000, why not here??? */
-	return (long)(duration * 3520.0 / CLOCKS_PER_SEC);
-}
 
 void spawn_note(struct note snote, float distance)
 {
@@ -371,7 +365,6 @@ int main(int argc, char** argv)
 
 	bool done = false;
 	bool crosshair_overlay = false;
-	long song_time;
 
 	/* variables to not read full arrays on each iteration
 	 * Strategy: whenever a block/obstacle/event is spawned, move progress index past it.
@@ -423,7 +416,10 @@ int main(int argc, char** argv)
 	}
 	*/
 
-	clock_t start_time = clock();
+	struct timeval start_time, current_time; // start and current time for gettimeofday(2)
+	gettimeofday(&start_time, NULL);
+	unsigned long long song_time;
+
 	/* start Music */
 	Mix_PlayMusic(gMusic, -1);
 	// DEBUG
@@ -432,27 +428,31 @@ int main(int argc, char** argv)
 	while(!done){
 		/* update current time */
 		/* TODO: account for pauses once implemented */
-		song_time = clock_to_msec(clock() - start_time);
+		gettimeofday(&current_time, NULL);
+		song_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec)
+				- (start_time.tv_sec * 1000000 + start_time.tv_usec));
 
 		iter++;
 		if (iter % 1000 == 0)
-			printf("song_time: %.1f\n", song_time / 1000.0);
+			printf("song_time: %.1f s\n",
+				song_time / 1000000.0);
 
 		ohmd_ctx_update(ctx);
 		move_all_objects(0.5);
 
 		/* check if notes/obstacles/events need to spawn */
 		// TODO: fix the temporary correction factor of 3 in this while loop
-		while (note_spawn_time[next_note] + offset < song_time  //* 3.55
+		while (note_spawn_time[next_note] + offset < song_time / 1000.0
 				&& next_note < num_notes)
 		{
 			float relPos = ((float)spawn_z * (
-				1 - ((((float)note_spawn_time[next_note] + (float)offset) - (float)song_time)
+				1 - ((((float)note_spawn_time[next_note] + (float)offset) - (float)song_time / 1000.0)
 				/ (float)offset)));
 			printf("relPos: %.1f, from %.1f / %.1f * %d\n",
-				relPos, ((float)note_spawn_time[next_note] + (float)offset) - (float)song_time, (float)offset, spawn_z);
+				relPos, ((float)note_spawn_time[next_note] + (float)offset) - (float)song_time / 1000.0, (float)offset, spawn_z);
 			spawn_note(_notes[next_note], relPos);
-			printf("note spawned at song_time: %.1f s\n", song_time / 1000.0);
+			printf("note spawned at song_time: %.1f s\n",
+				song_time / 1000000.0);
 			next_note++;
 		}
 
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_m:
 					printf("song_time: %.1f s, next note_spawn_time: %.1f s\n",
-							song_time / 1000.0,
+							song_time / 1000000.0,
 							note_spawn_time[next_note] / 1000.0);
 					break;
 				default:
