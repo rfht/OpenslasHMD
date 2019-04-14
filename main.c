@@ -178,6 +178,7 @@ void print_help()
 	printf("| OpenslasHMD Help                                        |\n");
 	printf("|=========================================================|\n");
 	printf("| -chart mysong/mysong.json  - json chart of the song     |\n");
+	printf("| -map mysong/mysong.json    - same as -chart             |\n");
 	printf("| -song mysong/mysong.ogg    - audio file of the song     |\n");
 	printf("|                                                         |\n");
 	printf("| - Example -                                             |\n"); 
@@ -224,7 +225,7 @@ int main(int argc, char** argv)
 			song = argv[i+1];
 			printf("Song: %s\n", song);
 		}
-		if (strcmp(argv[i], "-chart") == 0 && i < argc - 1) {
+		if ((strcmp(argv[i], "-chart") == 0 || strcmp(argv[i], "-map") == 0) && i < argc - 1) {
 			chart = argv[i+1];
 			printf("Chart %s\n", chart);
 		}
