@@ -140,9 +140,20 @@ void draw_cubes(GLuint shader)
 	// TODO - WORKAROUND: 
 	// move the floor to -1.8m height if the HMD tracker sits at zero
 	floor = m4_mul(floor, m4_translation(vec3(0, floor_level - floor_thickness, 0)));
+
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*) floor.m);
 	glUniform4f(colorLoc, 0, .4f, .25f, .9f);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	/* playerzone visualization - TODO: add switch to hide/disable */
+	mat4_t pzone = m4_identity();
+	/* TODO: unclear why the grid needs to be shrunk by half in order to be of the right size */
+	pzone = m4_mul(pzone, m4_scaling(vec3(spawn_grid_width * .5f, spawn_grid_height * .5f, .1f)));
+	pzone = m4_mul(pzone, m4_translation(vec3(0, 0, -playerzone_z)));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*) pzone.m);
+	glUniform4f(colorLoc, .6f, .6f, .6f, .4f);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	
 }
 /*
 void draw_controllers(GLuint shader, ohmd_device *lc, ohmd_device *rc)
@@ -426,6 +437,9 @@ int main(int argc, char** argv)
 	// DEBUG
 	int iter = 0;
 
+	float turn_x = 0.0f;	// float angle_in_rad for m4_rotation_x()
+	float turn_y = 0.0f;	// float angle_in_rad for m4_rotation_y()
+
 	while(!done){
 		/* update current time */
 		/* TODO: account for pauses once implemented */
@@ -442,7 +456,6 @@ int main(int argc, char** argv)
 		move_all_objects(0.5);
 
 		/* check if notes/obstacles/events need to spawn */
-		// TODO: fix the temporary correction factor of 3 in this while loop
 		while (note_spawn_time[next_note] + offset < song_time / 1000.0
 				&& next_note < num_notes)
 		{
@@ -474,6 +487,18 @@ int main(int argc, char** argv)
 							song_time / 1000000.0,
 							note_spawn_time[next_note] / 1000.0);
 					break;
+				case SDLK_LEFT:
+					turn_x -= 0.2f;
+					break;
+				case SDLK_RIGHT:
+					turn_x += 0.2f;
+					break;
+				case SDLK_UP:
+					turn_y -= 0.2f;
+					break;
+				case SDLK_DOWN:
+					turn_y += 0.2f;
+					break;
 				default:
 					break;
 				}
@@ -504,7 +529,31 @@ int main(int argc, char** argv)
 
 			float viewmatrix[16];
 			ohmd_device_getf(hmd, OHMD_LEFT_EYE_GL_MODELVIEW_MATRIX, viewmatrix);
-			glUniformMatrix4fv(glGetUniformLocation(appshader, "view"), 1, GL_FALSE, viewmatrix);
+			mat4_t m4_adj_viewmatrix = mat4(viewmatrix[0], viewmatrix[1], viewmatrix[2], viewmatrix[3],
+				viewmatrix[4], viewmatrix[5], viewmatrix[6], viewmatrix[7],
+				viewmatrix[8], viewmatrix[9], viewmatrix[10], viewmatrix[11],
+				viewmatrix[12], viewmatrix[13], viewmatrix[14], viewmatrix[15]
+				);
+			/* TODO: fix this hack of swapping x and y - not sure where the bug is that this workaround is needed... */
+			m4_adj_viewmatrix = m4_mul(m4_adj_viewmatrix, m4_rotation_x(turn_y));
+			m4_adj_viewmatrix = m4_mul(m4_adj_viewmatrix, m4_rotation_y(turn_x));
+			float new_viewmatrix[16] = { m4_adj_viewmatrix.m00,
+				m4_adj_viewmatrix.m01,
+				m4_adj_viewmatrix.m02,
+				m4_adj_viewmatrix.m03,
+				m4_adj_viewmatrix.m10,
+				m4_adj_viewmatrix.m11,
+				m4_adj_viewmatrix.m12,
+				m4_adj_viewmatrix.m13,
+				m4_adj_viewmatrix.m20,
+				m4_adj_viewmatrix.m21,
+				m4_adj_viewmatrix.m22,
+				m4_adj_viewmatrix.m23,
+				m4_adj_viewmatrix.m30,
+				m4_adj_viewmatrix.m31,
+				m4_adj_viewmatrix.m32,
+				m4_adj_viewmatrix.m33 };
+			glUniformMatrix4fv(glGetUniformLocation(appshader, "view"), 1, GL_FALSE, new_viewmatrix);
 
 			draw_cubes(appshader);
 			//draw_controllers(appshader, lc, rc);
